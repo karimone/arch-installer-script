@@ -22,7 +22,57 @@ RAM_SIZE=$(free --giga | awk '/^Mem:/{print $2}')
 HARD_DRIVE_SIZE=$(fdisk -l | head -n 1 | grep Disk | awk '{print int($3)}')
 FORMAT_SPACE=$((HARD_DRIVE_SIZE-RAM_SIZE))
 MOUNTPOINT=/mnt
+COUNTRY_NAME="Australia"
+COUNTRY_CODE="AU"
+REGION="Australia"
+CITY="Melbourne"
+LOCALE_UTF8="en_US.UTF-8 UTF-8"
+HOSTNAME="bradbury"
 
+adduserandpass() { \
+	arch_chroot "useradd -m -g wheel -s /bin/bash \"$USERNAME\" >/dev/null 2>&1" ||
+	arch_chroot "usermod -a -G wheel \"$USERNAME\" && mkdir -p /home/\"$USERNAME\" && chown \"$USERNAME\":wheel /home/\"$USERNAME\""
+	arch_chroot "echo \"$USERNAME:$PASSWORD\" | chpasswd"
+}
+
+configure_mirrorlist(){
+  echo "Configure mirror list..."
+  url="https://www.archlinux.org/mirrorlist/?country=${COUNTRY_CODE}&use_mirror_status=on"
+  tmpfile=$(mktemp --suffix=-mirrorlist)
+
+  # Get latest mirror list and save to tmpfile
+  curl -so ${tmpfile} ${url}
+  sed -i 's/^#Server/Server/g' ${tmpfile}
+
+  # Backup and replace current mirrorlist file (if new file is non-zero)
+  if [[ -s ${tmpfile} ]]; then
+   { echo " Backing up the original mirrorlist..."
+     mv -i /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig; } &&
+   { echo " Rotating the new list into place..."
+     mv -i ${tmpfile} /etc/pacman.d/mirrorlist; }
+  else
+    echo " Unable to update, could not download list."
+  fi
+  # better repo should go first
+  pacman -Sy --confirm pacman-contrib
+  cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
+  rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
+  rm /etc/pacman.d/mirrorlist.tmp
+  # allow global read access (required for non-root yaourt execution)
+  chmod +r /etc/pacman.d/mirrorlist
+  #$EDITOR /etc/pacman.d/mirrorlist
+}
+
+configure_hostname(){
+  echo "$HOSTNAME" > ${MOUNTPOINT}/etc/hostname
+  if [[ ! -f ${MOUNTPOINT}/etc/hosts.aui ]]; then
+    cp ${MOUNTPOINT}/etc/hosts ${MOUNTPOINT}/etc/hosts.aui
+  else
+    cp ${MOUNTPOINT}/etc/hosts.aui ${MOUNTPOINT}/etc/hosts
+  fi
+  arch_chroot "sed -i '/127.0.0.1/s/$/ '${HOSTNAME}'/' /etc/hosts"
+  arch_chroot "sed -i '/::1/s/$/ '${HOSTNAME}'/' /etc/hosts"
+}
 
 function  arch_chroot() {
     arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
@@ -74,6 +124,9 @@ This script will create and format the partitions as follows:
     /dev/sda3 - rest of space ${FORMAT_SPACE}GB will be mounted as /
 EOF
 
+# clean everything on the hard drive
+wipefs -a /dev/sda
+
 # PARTITION THE HARD DRIVE
 sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV}
 
@@ -103,8 +156,8 @@ EOF
 
 printf "Formatting the partition..."
 # Format the partitions
-mkfs.ext4 /dev/sda1
-mkfs.ext4 /dev/sda3
+yes | mkfs.ext4 /dev/sda1
+yes | mkfs.ext4 /dev/sda3
 printOk
 
 printf "Format and activate swap partition..."
@@ -128,18 +181,37 @@ mkdir -pv /mnt/boot/
 mount /dev/sda1 /mnt/boot/
 printOk
 
+configure_mirrorlist
+
+# Install Arch Linux
+echo "Starting install base arch..."
+pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober
+
+
 # Generate fstab
 echo "Generate fstab...${printOk}"
 genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
-# Install Arch Linux
-echo "Starting install base arch..."
-pacstrap /mnt base base-devel
+arch_chroot "ln -sf /usr/share/zoneinfo/${REGION}/${CITY} /etc/localtime"
+arch_chroot "hwclock --systohc --utc"
+arch_chroot "locale-gen"
 
+echo "Configure locale... "
+echo 'LANG="'$LOCALE_UTF8'"' > ${MOUNTPOINT}/etc/locale.conf
+arch_chroot "sed -i 's/#\('${LOCALE_UTF8}'\)/\1/' /etc/locale.gen"
+arch_chroot "locale-gen"
 
+configure_hostname
 
+echo "set root password"
+passwd
 
+umount /mnt/boot
+umount /mnt
+swapoff /dev/sda2
 
+echo "done. you cam reboot and start the second step"
+# adduserandpass
 
 
