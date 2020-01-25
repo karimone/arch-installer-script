@@ -125,7 +125,7 @@ printOk
 printf "Mount partitions..."
 mount /dev/sda3 /mnt
 mkdir -pv /mnt/boot/
-mount /dev/sda1 /mnt/boot/efi
+mount /dev/sda1 /mnt/boot/
 printOk
 
 # Generate fstab
