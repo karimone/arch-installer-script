@@ -48,7 +48,7 @@ maininstall() { # Installs all needed programs from main repo.
 }
 
 
-manualinstall yay || error "Failed to install AUR helper."
+manualinstall "yay" || error "Failed to install AUR helper."
 
 installationloop() {
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
