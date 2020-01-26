@@ -29,6 +29,9 @@ CITY="Melbourne"
 LOCALE_UTF8="en_US.UTF-8 UTF-8"
 HOSTNAME="bradbury"
 
+POST_INSTALL_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/post_install.sh"
+
+curl -LO ${POST_INSTALL_URL}
 
 configure_mirrorlist(){
   echo "Configure mirror list..."
