@@ -1,6 +1,7 @@
 #! /bin/bash
 
 progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
+name="karim"
 
 installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ;}
 grepseq="\"^[PGA]*,\""
@@ -87,10 +88,10 @@ grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Create new user
-useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh karim
+useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh $name
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
-echo "Set password for new user karim"
-passwd karim
+echo "Set password for new user ${name}"
+passwd $name
 
 # Setup display manager
 # systemctl enable sddm.service
