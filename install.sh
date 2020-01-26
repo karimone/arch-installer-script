@@ -115,7 +115,7 @@ EOF
 wipefs -a /dev/sda
 
 # PARTITION THE HARD DRIVE
-sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV} > /dev/null 2&1
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV}
 
   o # clear the in memory partition table
   n # new partition
