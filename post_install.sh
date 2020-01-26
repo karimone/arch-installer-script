@@ -1,5 +1,58 @@
 #! /bin/bash
 
+progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
+
+installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ;}
+grepseq="\"^[PGA]*,\""
+
+error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
+
+gitmakeinstall() {
+	dir=$(mktemp -d)
+	git clone --depth 1 "$1" "$dir" >/dev/null 2>&1
+	cd "$dir" || exit
+	make >/dev/null 2>&1
+	make install >/dev/null 2>&1
+	cd /tmp || return ;}
+
+manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
+	[ -f "/usr/bin/$1" ] || (
+	cd /tmp || exit
+	rm -rf /tmp/"$1"*
+	curl -sO https://aur.archlinux.org/cgit/aur.git/snapshot/"$1".tar.gz &&
+	sudo -u "$name" tar -xvf "$1".tar.gz >/dev/null 2>&1 &&
+	cd "$1" &&
+	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1
+	cd /tmp || return) ;}
+
+aurinstall() { \
+	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
+	sudo -u "$name" $aurhelper -S --noconfirm "$1" >/dev/null 2>&1
+	}
+
+pipinstall() { \
+	command -v pip || installpkg python-pip >/dev/null 2>&1
+	yes | pip install "$1"
+	}
+
+manualinstall "yay" || error "Failed to install AUR helper."
+
+installationloop() { \
+	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
+	total=$(wc -l < /tmp/progs.csv)
+	aurinstalled=$(pacman -Qqm)
+	while IFS=, read -r tag program comment; do
+		n=$((n+1))
+		echo "$comment" | grep "^\".*\"$" >/dev/null 2>&1 && comment="$(echo "$comment" | sed "s/\(^\"\|\"$\)//g")"
+		case "$tag" in
+			"A") aurinstall "$program" "$comment" ;;
+			"G") gitmakeinstall "$program" "$comment" ;;
+			"P") pipinstall "$program" "$comment" ;;
+			*) maininstall "$program" "$comment" ;;
+		esac
+	done < /tmp/progs.csv ;}
+
+
 echo "Karim's Gorjux Arch configuration"
 
 # Set date time
