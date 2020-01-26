@@ -17,7 +17,6 @@ gitmakeinstall() {
 	cd /tmp || return ;}
 
 manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
-    echo "manual install $1 $2"
 	[ -f "/usr/bin/$1" ] || (
 	cd /tmp || exit
 	rm -rf /tmp/"$1"*
@@ -44,8 +43,6 @@ maininstall() { # Installs all needed programs from main repo.
 	installpkg "$1"
 	}
 
-
-manualinstall "yay" || error "Failed to install AUR helper."
 
 installationloop() { \
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
@@ -105,6 +102,7 @@ systemctl enable NetworkManager.service > /dev/null 2&1
 echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
 
 echo "Start the installation from prog file"
+manualinstall "yay" || error "Failed to install AUR helper."
 installationloop
 
 echo "Configuration done. You can now exit chroot."
