@@ -25,6 +25,7 @@ graphviz
 i3-gaps-rounded-git
 i3lock-fancy-dualmonitors-git
 ipython
+ly-git
 jdownloader2
 kitty
 lolcat
