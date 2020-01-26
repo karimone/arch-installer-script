@@ -143,18 +143,18 @@ EOF
 
 printf "Formatting the partition..."
 # Format the partitions
-yes | mkfs.ext4 /dev/sda1 > /dev/null 2&1
-yes | mkfs.ext4 /dev/sda3 > /dev/null 2&1
+yes | mkfs.ext4 /dev/sda1
+yes | mkfs.ext4 /dev/sda3
 
 printOk
 
 printf "Format and activate swap partition..."
-mkswap /dev/sda2 > /dev/null 2&1
-swapon /dev/sda2 > /dev/null 2&1
+mkswap /dev/sda2
+swapon /dev/sda2
 printOk
 
 printf "Set up time using ntp..."
-timedatectl set-ntp true > /dev/null 2&1
+timedatectl set-ntp true
 
 printOk
 
@@ -165,25 +165,25 @@ printOk
 
 # Mount the partitions
 printf "Mount partitions..."
-mount /dev/sda3 /mnt > /dev/null 2&1
-mkdir -pv /mnt/boot/ > /dev/null 2&1
-mount /dev/sda1 /mnt/boot/ > /dev/null 2&1
+mount /dev/sda3 /mnt
+mkdir -pv /mnt/boot/
+mount /dev/sda1 /mnt/boot/
 printOk
 
 configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode iw wpa_supplicant networkmanager network-manager-applet git > /dev/null 2&1
+pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode iw wpa_supplicant networkmanager network-manager-applet git
 
 # Generate fstab
 echo "Generate fstab...${printOk}"
-genfstab -U /mnt >> /mnt/etc/fstab > /dev/null 2&1
+genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
 # Copy post_install system cinfiguration script to new /root
-cp -rfv post_install.sh /mnt/root > /dev/null 2&1
-chmod a+x /mnt/root/post_install.sh > /dev/null 2&1
+cp -rfv post_install.sh /mnt/root
+chmod a+x /mnt/root/post_install.sh
 
 # Chroot into new system
 echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"
