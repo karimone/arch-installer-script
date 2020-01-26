@@ -8,6 +8,7 @@ grepseq="\"^[PGA]*,\""
 error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
 
 gitmakeinstall() {
+    echo "git make install $1 $2"
 	dir=$(mktemp -d)
 	git clone --depth 1 "$1" "$dir" >/dev/null 2>&1
 	cd "$dir" || exit
@@ -16,6 +17,7 @@ gitmakeinstall() {
 	cd /tmp || return ;}
 
 manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
+    echo "manual install $1 $2"
 	[ -f "/usr/bin/$1" ] || (
 	cd /tmp || exit
 	rm -rf /tmp/"$1"*
@@ -26,14 +28,22 @@ manualinstall() { # Installs $1 manually if not installed. Used only for AUR hel
 	cd /tmp || return) ;}
 
 aurinstall() { \
+    echo "aur install $1 $2"
 	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
 	sudo -u "$name" $aurhelper -S --noconfirm "$1" >/dev/null 2>&1
 	}
 
 pipinstall() { \
+    echo "pip install $1 $2"
 	command -v pip || installpkg python-pip >/dev/null 2>&1
 	yes | pip install "$1"
 	}
+
+maininstall() { # Installs all needed programs from main repo.
+    echo "manual install $1 $2"
+	installpkg "$1"
+	}
+
 
 manualinstall "yay" || error "Failed to install AUR helper."
 
@@ -92,5 +102,8 @@ systemctl enable NetworkManager.service
 
 # disable the beep
 echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
+
+echo "Start the installation from prog file"
+installationloop
 
 echo "Configuration done. You can now exit chroot."
