@@ -96,14 +96,14 @@ passwd $name
 # Setup display manager
 # systemctl enable sddm.service
 
-# Enable services
-systemctl enable NetworkManager.service > /dev/null 2&1
-
 # disable the beep
 echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
 
 echo "Start the installation from prog file"
 manualinstall "yay" || error "Failed to install AUR helper."
 installationloop
+
+# Enable services
+systemctl enable NetworkManager.service > /dev/null 2&1
 
 echo "Configuration done. You can now exit chroot."
