@@ -1,9 +1,8 @@
 #! /bin/bash
 
 progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
-name="karim"
 
-installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ;}
+installpkg(){ pacman --noconfirm --needed -S "$1" # > /dev/null 2>&1 ;}
 grepseq="\"^[PGA]*,\""
 
 error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
@@ -18,24 +17,25 @@ gitmakeinstall() {
 	cd /tmp || return ;}
 
 manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
+    echo "manual install $1 $2"
 	[ -f "/usr/bin/$1" ] || (
 	cd /tmp || exit
 	rm -rf /tmp/"$1"*
 	curl -sO https://aur.archlinux.org/cgit/aur.git/snapshot/"$1".tar.gz &&
-	sudo -u "$name" tar -xvf "$1".tar.gz # >/dev/null 2>&1 &&
+	sudo -u "$name" tar -xvf "$1".tar.gz >/dev/null 2>&1 &&
 	cd "$1" &&
-	sudo -u "$name" makepkg --noconfirm -si # >/dev/null 2>&1
+	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1
 	cd /tmp || return) ;}
 
 aurinstall() { \
     echo "aur install $1 $2"
-	echo "$aurinstalled" | grep "^$1$" # >/dev/null 2>&1 && return
-	sudo -u "$name" $aurhelper -S --noconfirm "$1" # >/dev/null 2>&1
+	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
+	sudo -u "$name" $aurhelper -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu "$1" # >/dev/null 2>&1
 	}
 
 pipinstall() { \
     echo "pip install $1 $2"
-	command -v pip || installpkg python-pip # >/dev/null 2>&1
+	command -v pip || installpkg python-pip >/dev/null 2>&1
 	yes | pip install "$1"
 	}
 
@@ -44,6 +44,8 @@ maininstall() { # Installs all needed programs from main repo.
 	installpkg "$1"
 	}
 
+
+manualinstall "yay" || error "Failed to install AUR helper."
 
 installationloop() { \
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
@@ -77,7 +79,6 @@ echo "bradbury" >> /etc/hostname
 echo "127.0.1.1 bradbury.localdomain  bradbury" >> /etc/hosts
 
 # Set root password
-echo "Set root password"
 passwd
 
 # Install bootloader
@@ -88,22 +89,21 @@ grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Create new user
-useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh $name
+useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh karim
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
-echo "Set password for new user ${name}"
-passwd $name
+echo "Set password for new user karim"
+passwd karim
 
 # Setup display manager
 # systemctl enable sddm.service
 
+# Enable services
+systemctl enable NetworkManager.service
+
 # disable the beep
-echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
+echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
 
 echo "Start the installation from prog file"
-manualinstall "yay" || error "Failed to install AUR helper."
 installationloop
-
-# Enable services
-systemctl enable NetworkManager.service > /dev/null 2&1
 
 echo "Configuration done. You can now exit chroot."
