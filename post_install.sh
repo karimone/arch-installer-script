@@ -102,7 +102,7 @@ passwd karim
 systemctl enable NetworkManager.service
 
 # disable the beep
-echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
+echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;
 
 echo "Start the installation from prog file"
 installationloop
