@@ -115,7 +115,7 @@ EOF
 wipefs -a /dev/sda
 
 # PARTITION THE HARD DRIVE
-sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV}
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV} > /dev/null 2&1
 
   o # clear the in memory partition table
   n # new partition
@@ -143,17 +143,19 @@ EOF
 
 printf "Formatting the partition..."
 # Format the partitions
-yes | mkfs.ext4 /dev/sda1
-yes | mkfs.ext4 /dev/sda3
+yes | mkfs.ext4 /dev/sda1 > /dev/null 2&1
+yes | mkfs.ext4 /dev/sda3 > /dev/null 2&1
+
 printOk
 
 printf "Format and activate swap partition..."
-mkswap /dev/sda2
-swapon /dev/sda2
+mkswap /dev/sda2 > /dev/null 2&1
+swapon /dev/sda2 > /dev/null 2&1
 printOk
 
 printf "Set up time using ntp..."
-timedatectl set-ntp true
+timedatectl set-ntp true > /dev/null 2&1
+
 printOk
 
 # Initate pacman keyring
@@ -163,25 +165,25 @@ printOk
 
 # Mount the partitions
 printf "Mount partitions..."
-mount /dev/sda3 /mnt
-mkdir -pv /mnt/boot/
-mount /dev/sda1 /mnt/boot/
+mount /dev/sda3 /mnt > /dev/null 2&1
+mkdir -pv /mnt/boot/ > /dev/null 2&1
+mount /dev/sda1 /mnt/boot/ > /dev/null 2&1
 printOk
 
 configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode dosfstools freetype2 fuse2 mtools iw wpa_supplicant networkmanager network-manager-applet git
+pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode iw wpa_supplicant networkmanager network-manager-applet git > /dev/null 2&1
 
 # Generate fstab
 echo "Generate fstab...${printOk}"
-genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab > /dev/null 2&1
 printOk
 
 # Copy post_install system cinfiguration script to new /root
-cp -rfv post_install.sh /mnt/root
-chmod a+x /mnt/root/post_install.sh
+cp -rfv post_install.sh /mnt/root > /dev/null 2&1
+chmod a+x /mnt/root/post_install.sh > /dev/null 2&1
 
 # Chroot into new system
 echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"

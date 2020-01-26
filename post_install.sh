@@ -22,20 +22,20 @@ manualinstall() { # Installs $1 manually if not installed. Used only for AUR hel
 	cd /tmp || exit
 	rm -rf /tmp/"$1"*
 	curl -sO https://aur.archlinux.org/cgit/aur.git/snapshot/"$1".tar.gz &&
-	sudo -u "$name" tar -xvf "$1".tar.gz >/dev/null 2>&1 &&
+	sudo -u "$name" tar -xvf "$1".tar.gz # >/dev/null 2>&1 &&
 	cd "$1" &&
-	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1
+	sudo -u "$name" makepkg --noconfirm -si # >/dev/null 2>&1
 	cd /tmp || return) ;}
 
 aurinstall() { \
     echo "aur install $1 $2"
-	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
-	sudo -u "$name" $aurhelper -S --noconfirm "$1" >/dev/null 2>&1
+	echo "$aurinstalled" | grep "^$1$" # >/dev/null 2>&1 && return
+	sudo -u "$name" $aurhelper -S --noconfirm "$1" # >/dev/null 2>&1
 	}
 
 pipinstall() { \
     echo "pip install $1 $2"
-	command -v pip || installpkg python-pip >/dev/null 2>&1
+	command -v pip || installpkg python-pip # >/dev/null 2>&1
 	yes | pip install "$1"
 	}
 
@@ -79,6 +79,7 @@ echo "bradbury" >> /etc/hostname
 echo "127.0.1.1 bradbury.localdomain  bradbury" >> /etc/hosts
 
 # Set root password
+echo "Set root password"
 passwd
 
 # Install bootloader
@@ -98,10 +99,10 @@ passwd karim
 # systemctl enable sddm.service
 
 # Enable services
-systemctl enable NetworkManager.service
+systemctl enable NetworkManager.service > /dev/null 2&1
 
 # disable the beep
-echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;
+echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
 
 echo "Start the installation from prog file"
 installationloop
