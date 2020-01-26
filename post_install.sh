@@ -33,7 +33,7 @@ manualinstall() { # Installs $1 manually if not installed. Used only for AUR hel
 
 aurinstall() {
     echo "aur install $1 $2"
-	sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu "$1" # >/dev/null 2>&1
+	sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides "$1" # >/dev/null 2>&1
 }
 
 pipinstall() {
