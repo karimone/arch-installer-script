@@ -182,14 +182,15 @@ printOk
 
 # Copy post-install system cinfiguration script to new /root
 cp -rfv post-install.sh /mnt/root
-chmod a+x /mnt/root/post-install.sh
+chmod a+x /mnt/root/post_install.sh
 
 # Chroot into new system
 echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"
 echo "Press any key to chroot..."
 read tmpvar
-arch-chroot /mnt /bin/bash
+arch_chroot /root/post_install.sh
 
+echo "Post install done."
 
 echo "Unmounting..."
 umount -R /mnt
