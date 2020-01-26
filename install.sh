@@ -180,8 +180,8 @@ echo "Generate fstab...${printOk}"
 genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
-# Copy post-install system cinfiguration script to new /root
-cp -rfv post-install.sh /mnt/root
+# Copy post_install system cinfiguration script to new /root
+cp -rfv post_install.sh /mnt/root
 chmod a+x /mnt/root/post_install.sh
 
 # Chroot into new system
