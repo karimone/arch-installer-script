@@ -1,8 +1,10 @@
 #! /bin/bash
 
 progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
+name="karim"
+hostname="bradbury"
 
-installpkg() { pacman --noconfirm --needed -S "$1"; } #> /dev/null 2>&1 ;}
+installpkg() { pacman --noconfirm --needed -S "$1" > /dev/null 2>&1 ;}
 grepseq="\"^[PGA]*,\""
 
 error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
@@ -31,8 +33,7 @@ manualinstall() { # Installs $1 manually if not installed. Used only for AUR hel
 
 aurinstall() {
     echo "aur install $1 $2"
-	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
-	sudo -u "$name" $aurhelper -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu "$1" # >/dev/null 2>&1
+	sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu "$1" # >/dev/null 2>&1
 }
 
 pipinstall() {
@@ -47,7 +48,7 @@ maininstall() { # Installs all needed programs from main repo.
 }
 
 
-manualinstall "yay" || error "Failed to install AUR helper."
+manualinstall yay || error "Failed to install AUR helper."
 
 installationloop() {
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
@@ -78,8 +79,8 @@ locale-gen
 echo "LANG=en_US.UTF-8" >> /etc/locale.conf
 
 # Set hostname
-echo "bradbury" >> /etc/hostname
-echo "127.0.1.1 bradbury.localdomain  bradbury" >> /etc/hosts
+echo "${hostname}" >> /etc/hostname
+echo "127.0.1.1 ${hostname}.localdomain  ${hostname}" >> /etc/hosts
 
 # Set root password
 passwd
@@ -92,10 +93,10 @@ grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Create new user
-useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh karim
+useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh $name
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
-echo "Set password for new user karim"
-passwd karim
+echo "Set password for new user ${name}"
+passwd $name
 
 # Setup display manager
 # systemctl enable sddm.service
