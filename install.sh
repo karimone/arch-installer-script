@@ -29,11 +29,6 @@ CITY="Melbourne"
 LOCALE_UTF8="en_US.UTF-8 UTF-8"
 HOSTNAME="bradbury"
 
-adduserandpass() { \
-	arch_chroot "useradd -m -g wheel -s /bin/bash \"$USERNAME\" >/dev/null 2>&1" ||
-	arch_chroot "usermod -a -G wheel \"$USERNAME\" && mkdir -p /home/\"$USERNAME\" && chown \"$USERNAME\":wheel /home/\"$USERNAME\""
-	arch_chroot "echo \"$USERNAME:$PASSWORD\" | chpasswd"
-}
 
 configure_mirrorlist(){
   echo "Configure mirror list..."
@@ -61,17 +56,6 @@ configure_mirrorlist(){
   # allow global read access (required for non-root yaourt execution)
   chmod +r /etc/pacman.d/mirrorlist
   #$EDITOR /etc/pacman.d/mirrorlist
-}
-
-configure_hostname(){
-  echo "$HOSTNAME" > ${MOUNTPOINT}/etc/hostname
-  if [[ ! -f ${MOUNTPOINT}/etc/hosts.aui ]]; then
-    cp ${MOUNTPOINT}/etc/hosts ${MOUNTPOINT}/etc/hosts.aui
-  else
-    cp ${MOUNTPOINT}/etc/hosts.aui ${MOUNTPOINT}/etc/hosts
-  fi
-  arch_chroot "sed -i '/127.0.0.1/s/$/ '${HOSTNAME}'/' /etc/hosts"
-  arch_chroot "sed -i '/::1/s/$/ '${HOSTNAME}'/' /etc/hosts"
 }
 
 function  arch_chroot() {
@@ -193,26 +177,24 @@ echo "Generate fstab...${printOk}"
 genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
-arch_chroot "ln -sf /usr/share/zoneinfo/${REGION}/${CITY} /etc/localtime"
-arch_chroot "hwclock --systohc --utc"
-arch_chroot "locale-gen"
+# Copy post-install system cinfiguration script to new /root
+cp -rfv post-install.sh /mnt/root
+chmod a+x /mnt/root/post-install.sh
 
-echo "Configure locale... "
-echo 'LANG="'$LOCALE_UTF8'"' > ${MOUNTPOINT}/etc/locale.conf
-arch_chroot "sed -i 's/#\('${LOCALE_UTF8}'\)/\1/' /etc/locale.gen"
-arch_chroot "locale-gen"
+# Chroot into new system
+echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"
+echo "Press any key to chroot..."
+read tmpvar
+arch-chroot /mnt /bin/bash
 
-configure_hostname
-
-echo "set root password"
-passwd
 
 echo "Unmounting..."
-umount /mnt/boot
-umount /mnt
-swapoff /dev/sda2
+umount -R /mnt
 
-echo "done. you cam reboot and start the second step"
-# adduserandpass
-
+# Finish
+echo "If post-install.sh was run succesfully, you will now have a fully working bootable Arch Linux system installed."
+echo "The only thing left is to reboot into the new system."
+echo "Press any key to reboot or Ctrl+C to cancel..."
+read tmpvar
+reboot
 
