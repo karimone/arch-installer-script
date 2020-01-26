@@ -185,7 +185,7 @@ configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober
+pacstrap ${MOUNTPOINT} base linux linux-firmware grub os-prober
 
 
 # Generate fstab
@@ -207,6 +207,7 @@ configure_hostname
 echo "set root password"
 passwd
 
+echo "Unmounting..."
 umount /mnt/boot
 umount /mnt
 swapoff /dev/sda2
