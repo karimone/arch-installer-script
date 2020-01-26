@@ -54,7 +54,7 @@ configure_mirrorlist(){
     echo " Unable to update, could not download list."
   fi
   # better repo should go first
-  pacman -Sy --confirm pacman-contrib
+  pacman -Sy --noconfirm pacman-contrib
   cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
   rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
   rm /etc/pacman.d/mirrorlist.tmp
