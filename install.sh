@@ -172,8 +172,7 @@ configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base linux linux-firmware grub os-prober
-
+pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode dosfstools freetype2 fuse2 mtools iw wpa_supplicant dialog xorg xorg-server xorg-xinit mesa xf86-video-intel networkmanager network-manager-applet
 
 # Generate fstab
 echo "Generate fstab...${printOk}"

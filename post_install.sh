@@ -22,11 +22,11 @@ passwd
 # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
 
 # MBR Instructions
-grub-install --target=i386-pc /dev/sdX
+grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Create new user
-useradd -m -G wheel,power,iput,storage,uucp,network -s /usr/bin/zsh karim
+useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/zsh karim
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
 echo "Set password for new user karim"
 passwd karim
@@ -36,5 +36,8 @@ passwd karim
 
 # Enable services
 systemctl enable NetworkManager.service
+
+# disable the beep
+echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
 
 echo "Configuration done. You can now exit chroot."
