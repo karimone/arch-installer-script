@@ -2,7 +2,7 @@
 
 progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
 
-installpkg(){ pacman --noconfirm --needed -S "$1" # > /dev/null 2>&1 ;}
+installpkg() { pacman --noconfirm --needed -S "$1"; } #> /dev/null 2>&1 ;}
 grepseq="\"^[PGA]*,\""
 
 error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
@@ -14,7 +14,8 @@ gitmakeinstall() {
 	cd "$dir" || exit
 	make >/dev/null 2>&1
 	make install >/dev/null 2>&1
-	cd /tmp || return ;}
+	cd /tmp || return ;
+}
 
 manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
     echo "manual install $1 $2"
@@ -25,24 +26,25 @@ manualinstall() { # Installs $1 manually if not installed. Used only for AUR hel
 	sudo -u "$name" tar -xvf "$1".tar.gz >/dev/null 2>&1 &&
 	cd "$1" &&
 	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1
-	cd /tmp || return) ;}
+	cd /tmp || return) ;
+}
 
-aurinstall() { \
+aurinstall() {
     echo "aur install $1 $2"
 	echo "$aurinstalled" | grep "^$1$" >/dev/null 2>&1 && return
 	sudo -u "$name" $aurhelper -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu "$1" # >/dev/null 2>&1
-	}
+}
 
-pipinstall() { \
+pipinstall() {
     echo "pip install $1 $2"
 	command -v pip || installpkg python-pip >/dev/null 2>&1
 	yes | pip install "$1"
-	}
+}
 
 maininstall() { # Installs all needed programs from main repo.
     echo "manual install $1 $2"
 	installpkg "$1"
-	}
+}
 
 
 manualinstall "yay" || error "Failed to install AUR helper."
