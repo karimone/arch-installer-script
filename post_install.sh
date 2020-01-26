@@ -47,7 +47,7 @@ maininstall() { # Installs all needed programs from main repo.
 
 manualinstall "yay" || error "Failed to install AUR helper."
 
-installationloop() { \
+installationloop() {
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
 	total=$(wc -l < /tmp/progs.csv)
 	aurinstalled=$(pacman -Qqm)
@@ -60,7 +60,8 @@ installationloop() { \
 			"P") pipinstall "$program" "$comment" ;;
 			*) maininstall "$program" "$comment" ;;
 		esac
-	done < /tmp/progs.csv ;}
+	done < /tmp/progs.csv ;
+}
 
 
 echo "Karim's Gorjux Arch configuration"
