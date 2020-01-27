@@ -28,10 +28,20 @@ REGION="Australia"
 CITY="Melbourne"
 LOCALE_UTF8="en_US.UTF-8 UTF-8"
 HOSTNAME="bradbury"
+SWAP_SIZE="8G"
 
 POST_INSTALL_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/post_install.sh"
+PACKAGES_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/packages.txt"
+YAY_PACKAGES_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/yay_packages.txt"
+
+PACKAGES_FILE="packages.txt"
+YAY_PACKAGES_FILE="yay_packages.txt"
 
 curl -LO ${POST_INSTALL_URL}
+curl -LO ${PACKAGES_URL}
+curl -LO ${YAY_PACKAGES_URL}
+
+PACMAN_PACKAGES=$(tr '\n' ' ' < $PACKAGES_FILE)
 
 configure_mirrorlist(){
   echo "Configure mirror list..."
@@ -114,6 +124,8 @@ EOF
 # clean everything on the hard drive
 wipefs -a /dev/sda
 
+# TODO: fix this
+SWAP_SIZE=$(SWAP_SIZE || RAM_SIZE)
 # PARTITION THE HARD DRIVE
 sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk ${TGTDEV}
 
@@ -174,7 +186,7 @@ configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware grub os-prober sudo zsh intel-ucode iw wpa_supplicant networkmanager network-manager-applet git
+pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware sudo git zsh grub vim
 
 # Generate fstab
 echo "Generate fstab...${printOk}"
@@ -182,22 +194,14 @@ genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
 # Copy post_install system cinfiguration script to new /root
-cp -rfv post_install.sh /mnt/root
+cp -rfv * /mnt/root
 chmod a+x /mnt/root/post_install.sh
 
 # Chroot into new system
 echo "Chrooting and post install"
 arch_chroot /root/post_install.sh
-
 echo "Post install done."
-
-echo "Unmounting..."
-umount -R /mnt
-
-# Finish
-echo "If post-install.sh was run succesfully, you will now have a fully working bootable Arch Linux system installed."
-echo "The only thing left is to reboot into the new system."
-echo "Press any key to reboot or Ctrl+C to cancel..."
-read tmpvar
-reboot
+echo ""
+echo "The log of the installation is in /mnt/root/install.log"
+echo "Have a look and then run: umount -R /mnt; reboot"
 

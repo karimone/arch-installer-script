@@ -1,71 +1,35 @@
 #! /bin/bash
 
 progsfile="https://raw.githubusercontent.com/karimone/arch-installer-script/master/progs.csv"
+
+# TODO: get from config file
 name="karim"
 hostname="bradbury"
 
-installpkg() { pacman --noconfirm --needed -S "$1" > /dev/null 2>&1 ;}
-grepseq="\"^[PGA]*,\""
+PACKAGES_FILE="/root/packages.txt"
+YAY_PACKAGES_FILE="/root/yay_packages.txt"
+PACMAN_PACKAGES=$(tr '\n' ' ' < $PACKAGES_FILE)
+YAY_PACKAGES=$(tr '\n' ' ' < $YAY_PACKAGES_FILE)
 
 error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
 
-gitmakeinstall() {
-    echo "git make install $1 $2"
-	dir=$(mktemp -d)
-	git clone --depth 1 "$1" "$dir" >/dev/null 2>&1
-	cd "$dir" || exit
-	make >/dev/null 2>&1
-	make install >/dev/null 2>&1
-	cd /tmp || return ;
-}
 
-manualinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
-    echo "manual install $1 $2"
-	[ -f "/usr/bin/$1" ] || (
+yayinstall() { # Installs $1 manually if not installed. Used only for AUR helper here.
+    echo "Install YAY"
+	[ -f "/usr/bin/yay" ] || (
 	cd /tmp || exit
-	rm -rf /tmp/"$1"*
-	curl -sO https://aur.archlinux.org/cgit/aur.git/snapshot/"$1".tar.gz &&
-	sudo -u "$name" tar -xvf "$1".tar.gz >/dev/null 2>&1 &&
-	cd "$1" &&
+	rm -rf /tmp/yay*
+	curl -sO https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz &&
+	sudo -u "$name" tar -xvf yay.tar.gz >/dev/null 2>&1 &&
+	cd yay &&
 	sudo -u "$name" makepkg --noconfirm -si >/dev/null 2>&1
 	cd /tmp || return) ;
 }
 
-aurinstall() {
-    echo "aur install $1 $2"
-	sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides "$1" # >/dev/null 2>&1
+install() {
+    echo "Install $1 $2"
+	sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides "$1" >> install.log
 }
-
-pipinstall() {
-    echo "pip install $1 $2"
-	command -v pip || installpkg python-pip >/dev/null 2>&1
-	yes | pip install "$1"
-}
-
-maininstall() { # Installs all needed programs from main repo.
-    echo "manual install $1 $2"
-	installpkg "$1"
-}
-
-
-manualinstall "yay" || error "Failed to install AUR helper."
-
-installationloop() {
-	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' | eval grep "$grepseq" > /tmp/progs.csv
-	total=$(wc -l < /tmp/progs.csv)
-	aurinstalled=$(pacman -Qqm)
-	while IFS=, read -r tag program comment; do
-		n=$((n+1))
-		echo "$comment" | grep "^\".*\"$" >/dev/null 2>&1 && comment="$(echo "$comment" | sed "s/\(^\"\|\"$\)//g")"
-		case "$tag" in
-			"A") aurinstall "$program" "$comment" ;;
-			"G") gitmakeinstall "$program" "$comment" ;;
-			"P") pipinstall "$program" "$comment" ;;
-			*) maininstall "$program" "$comment" ;;
-		esac
-	done < /tmp/progs.csv ;
-}
-
 
 echo "Karim's Gorjux Arch configuration"
 
@@ -89,7 +53,7 @@ passwd
 # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
 
 # MBR Instructions
-grub-install --target=i386-pc /dev/sda
+grub-install --target=i386-pc /dev/sda 
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Create new user
@@ -107,7 +71,11 @@ systemctl enable NetworkManager.service
 # disable the beep
 echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;
 
-echo "Start the installation from prog file"
-installationloop
+echo "Install pacman packages"
+sudo pacman -S --noconfirm  ${PACMAN_PACKAGES} # >> install.log
 
-echo "Configuration done. You can now exit chroot."
+yayinstall || error "Failed to install AUR helper."
+
+echo "Install YAY packages"
+sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides ${YAY_PACKAGES} # >> install.log
+
