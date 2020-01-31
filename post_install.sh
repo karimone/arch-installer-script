@@ -71,11 +71,11 @@ systemctl enable NetworkManager.service
 # disable the beep
 echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;
 
-echo "Install pacman packages"
-sudo pacman -S --noconfirm  ${PACMAN_PACKAGES} # >> install.log
+#echo "Install pacman packages"
+#sudo pacman -S --noconfirm  ${PACMAN_PACKAGES} # >> install.log
 
-yayinstall || error "Failed to install AUR helper."
+#yayinstall || error "Failed to install AUR helper."
 
-echo "Install YAY packages"
-sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides ${YAY_PACKAGES} # >> install.log
+#echo "Install YAY packages"
+#sudo -u "$name" yay -S --answerclean All --nocleanmenu --noeditmenu --nodiffmenu --noprovides ${YAY_PACKAGES} # >> install.log
 
