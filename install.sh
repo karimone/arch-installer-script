@@ -31,17 +31,13 @@ HOSTNAME="bradbury"
 SWAP_SIZE="8G"
 
 POST_INSTALL_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/post_install.sh"
-PACKAGES_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/packages.txt"
-YAY_PACKAGES_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/yay_packages.txt"
+CONF_URL="https://raw.githubusercontent.com/karimone/arch-installer-script/master/conf.sh"
 
 PACKAGES_FILE="packages.txt"
 YAY_PACKAGES_FILE="yay_packages.txt"
 
 curl -LO ${POST_INSTALL_URL}
-curl -LO ${PACKAGES_URL}
-curl -LO ${YAY_PACKAGES_URL}
-
-PACMAN_PACKAGES=$(tr '\n' ' ' < $PACKAGES_FILE)
+curl -LO ${CONF_URL}
 
 configure_mirrorlist(){
   echo "Configure mirror list..."
@@ -186,7 +182,8 @@ configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch..."
-pacstrap ${MOUNTPOINT} base base-devel linux linux-firmware sudo git zsh grub vim
+pacstrap ${MOUNTPOINT} base linux linux-firmware sudo git zsh grub vim networkmanager 
+n
 
 # Generate fstab
 echo "Generate fstab...${printOk}"

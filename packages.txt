@@ -1,6 +1,7 @@
 alsa-utils
 arandr
 awesome-terminal-fonts
+base-devel
 bc
 blueman
 bluez-utils
