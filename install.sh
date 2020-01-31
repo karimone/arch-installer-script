@@ -195,10 +195,15 @@ cp -rfv * /mnt/root
 chmod a+x /mnt/root/post_install.sh
 
 # Chroot into new system
-echo "Chrooting and post install"
-arch_chroot /root/post_install.sh
-echo "Post install done."
+echo "Chrooting and run configurator"
+arch_chroot /root/conf.sh
+cp -rfv * /home/karim
+chmod a+x /home/karim/post_install.sh
+echo "Configuration done."
 echo ""
-echo "The log of the installation is in /mnt/root/install.log"
-echo "Have a look and then run: umount -R /mnt; reboot"
+echo "Copied the post_install on /home/karim"
+umount -R /mnt
+echo "Press a key to restart..."
+read temp
+reboot
 
