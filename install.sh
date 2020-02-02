@@ -197,8 +197,8 @@ chmod a+x /mnt/root/conf.sh
 echo "Chrooting and run configurator"
 arch_chroot /root/conf.sh
 
-cp -rfv * /home/karim
-chmod a+x /home/karim/post_install.sh
+cp -rfv * /mnt/home/karim
+chmod a+x /mnt/home/karim/post_install.sh
 
 echo "Configuration done."
 echo ""
