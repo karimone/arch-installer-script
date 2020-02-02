@@ -190,14 +190,16 @@ genfstab -U /mnt >> /mnt/etc/fstab
 printOk
 
 # Copy post_install system cinfiguration script to new /root
-cp -rfv * /mnt/root
-chmod a+x /mnt/root/post_install.sh
+cp -rfv conf.sh /mnt/root
+chmod a+x /mnt/root/conf.sh
 
 # Chroot into new system
 echo "Chrooting and run configurator"
 arch_chroot /root/conf.sh
+
 cp -rfv * /home/karim
 chmod a+x /home/karim/post_install.sh
+
 echo "Configuration done."
 echo ""
 echo "Copied the post_install on /home/karim"
