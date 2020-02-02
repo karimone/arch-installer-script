@@ -182,7 +182,7 @@ configure_mirrorlist
 
 # Install Arch Linux
 echo "Starting install base arch... with some batteries"
-pacstrap ${MOUNTPOINT} base linux linux-firmware sudo openssh git zsh grub vim networkmanager dnsmasq networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc"
+pacstrap ${MOUNTPOINT} base linux linux-firmware sudo openssh git zsh grub vim networkmanager dnsmasq networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc
 
 # Generate fstab
 echo "Generate fstab...${printOk}"
